@@ -1,10 +1,8 @@
-import time
-from time import sleep
+import time 
 from picamera import PiCamera
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import RPi.GPIO as GPIO
-import usb.core
 from RPLCD.i2c import CharLCD
 
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1, cols=16, rows=2, dotsize=8)
@@ -18,7 +16,7 @@ GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 setup_done = False
 timestamp_toggle = True
 sequence = 1
-camera = PiCamera()
+camera = PiCamera(resolution=(640, 320), framerate=30)
 
 def toggle (channel):
     global timestamp_toggle
@@ -33,9 +31,12 @@ GPIO.add_event_detect(4, GPIO.FALLING, callback=program_start, bouncetime=200)
 
 while True:
 
+ 
+  camera.iso = 200
+  time.sleep(2)
+  sequence = 3
   iteration = 0
-  camera.start_preview()
-  sleep(2)
+  time.sleep(2)
 
   #Define the directory where to save data
   file_dir = f'/mnt/data-storage/data-capture_{sequence}/'
@@ -53,51 +54,50 @@ while True:
   lcd.write_string('Press button 2 to')
   lcd.cursor_pos = (1,0)
   lcd.write_string('toggle timestamp')
-  sleep(3)
+  time.sleep(3)
 
   while setup_done is False:
     lcd.clear()
     lcd.write_string(f'timestamp {timestamp_toggle}')
-    sleep(0.2)
+    time.sleep(0.2)
     if setup_done == True:
       lcd.clear()
       lcd.cursor_pos = (0,0)
       lcd.write_string(f'Image capture {sequence}')
       lcd.cursor_pos = (1,0)
       lcd.write_string('starting in 3s')
-      sleep(3)  
+      time.sleep(3)  
     
   lcd.clear
   while iteration < 300:
     if timestamp_toggle == True:
       current_time = time.strftime("%Y%m%d-%H%M%S")
       image_path_timestamp = os.path.join(img_dir, f'image_{current_time}.jpg')
-      camera.capture(image_path_timestamp, resize=(1920, 1080))
+      camera.capture(image_path_timestamp, resize=(640, 320))
       lcd.clear()
       lcd.cursor_pos = (0,0)
       lcd.write_string(f'{iteration} Images Saved')
       lcd.cursor_pos = (1,0)
       lcd.write_string(f'with timestamp')
       iteration +=1
-      sleep(0.2)
+
 
     if timestamp_toggle == False:
       image_path_cont = os.path.join(img_dir, f'image_{iteration}.jpg')
-      camera.capture(image_path_cont, resize=(1920, 1080))
+      camera.capture(image_path_cont, resize=(640, 320))
       lcd.clear()
       lcd.cursor_pos = (0,0)
       lcd.write_string(f'{iteration} Images Saved')
       iteration +=1
-      sleep(0.2) 
+  
 
     if iteration == 300:
       lcd.clear()
       lcd.cursor_pos = (0,0)
       lcd.write_string('Image Capture Done')
-      camera.stop_preview()
       sequence +=1
       setup_done = not setup_done
-      sleep(3)
+      time.sleep(3)
       break
     
     

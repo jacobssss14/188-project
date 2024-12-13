@@ -9,8 +9,9 @@ import threading
 from gps import *
 from config import sequence
 
+#Configure GPS Module
+
 gpsd = None #seting the global variable
- 
  
 class GpsPoller(threading.Thread):
   def __init__(self):
@@ -24,7 +25,7 @@ class GpsPoller(threading.Thread):
     global gpsd
     while gpsp.running:
       gpsd.next()
-
+#Configure Accelerometer
 class MPU6050:
     def __init__(self, bus=1, address=0x68):
         self.bus = smbus.SMBus(bus)
@@ -58,9 +59,7 @@ class MPU6050:
     
 mpu = MPU6050()
 
-   
-
-# Define some constants from the datasheet
+#Configure Light Sensor
 
 DEVICE     = 0x23 # Default device I2C address
 
@@ -112,9 +111,9 @@ file_dir = f'/home/pi/data-storage/data-capture_{sequence}/'
 img_dir = f'/home/pi/data-storage/data-capture_{sequence}/image-capture/'
 filename = f'/home/pi/data-storage/data-capture_{sequence}/data.csv'
  
-#Create folders if Necessary
-
 data = []
+
+#Create Folders when necessary
 
 if not os.path.exists(file_dir):
   os.makedirs(file_dir)

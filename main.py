@@ -100,9 +100,9 @@ def readLight(addr=DEVICE):
 
 iteration = 1
 camera = PiCamera(resolution=(640, 320))
-camera.iso = 200
-camera.shutter_speed = 8000
+#camera.iso = 800
 camera.start_preview()
+#camera.shutter_speed = 8000
 gpsp = GpsPoller()
 gpsp.start()
 time.sleep(2)
@@ -127,8 +127,9 @@ with open(filename, 'w', newline='') as csvfile:
   csvwriter.writerow(['Timestamp', 'Lux', 'Acceleration', 'Velocity'])
   begin_time = time.time()
   while iteration < 301:
-    start_time = time.time()
-    timestamp = time.strftime("%H%M%S%m")
+    start_time = time.time() 
+    timestamp_temp = datetime.now()
+    timestamp = timestamp_temp.strftime('%H%M%S.%f')
     image_path_timestamp = os.path.join(img_dir, f'image_{timestamp}.jpg')
     lightLevel=readLight()
     ax, ay, az = mpu.get_acceleration()
@@ -144,7 +145,10 @@ with open(filename, 'w', newline='') as csvfile:
     print(f'{iteration} Images Saved with timestamp')  
     current_time = time.time()
     time_elapsed = current_time-start_time
-    print("Elapsed Time: ", time_elapsed)
+    sleep_time = 0.2 - time_elapsed
+    if sleep_time >= 0: 
+      time.sleep(sleep_time)
+    print("Sample Time: ", time_elapsed)
     iteration +=1
     if iteration == 301:
       end_time = time.time()
